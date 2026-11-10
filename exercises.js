@@ -1,0 +1,102 @@
+/* Übungsbibliothek – hier kannst du Übungen ergänzen oder Texte anpassen.
+   Format: [id, Name, Ausführungstipps (mit | getrennt), einseitig?]
+   Bilder: img/<id>_0.jpg und img/<id>_1.jpg (optional, Quelle: free-exercise-db, Public Domain) */
+window.CATALOG = [
+ ['Brust',[
+  ['bench','Bankdrücken (LH)','Schulterblätter zusammen und nach unten|Stange zur unteren Brust führen|Füsse fest am Boden, Po bleibt auf der Bank'],
+  ['incline_db','Schrägbank-Kurzhanteldrücken','Bank auf ca. 30°|Hanteln auf Brusthöhe absenken, Ellbogen ca. 45°|Oben nicht zusammenschlagen, Spannung halten'],
+  ['db_bench','Kurzhantel-Bankdrücken','Schulterblätter zurückziehen|Hanteln kontrolliert seitlich der Brust absenken|Im leichten Bogen nach oben drücken'],
+  ['incline_bench','Schrägbankdrücken (LH)','Bank 30–45°|Stange zur oberen Brust führen|Ellbogen leicht unter der Stange'],
+  ['chest_press','Brustpresse (Maschine)','Sitz so, dass Griffe auf Brusthöhe sind|Schulterblätter an die Lehne|Langsam zurück, Gewicht nicht ablegen'],
+  ['incline_press_m','Schrägbank-Presse (Maschine)','Griffe auf Höhe obere Brust|Zügig drücken, 2–3 s zurück|Schultern unten lassen'],
+  ['flys','Flys','Arme leicht gebeugt, Winkel bleibt fix|Weit öffnen bis Dehnung in der Brust|Wie eine Umarmung zusammenführen'],
+  ['cable_cross','Cable Crossover','Leicht nach vorne lehnen, ein Fuss vor|Arme leicht gebeugt|Hände vor dem Körper zusammenführen, kurz halten'],
+  ['pec_deck','Butterfly (Maschine)','Griffe auf Brusthöhe|Ellbogen leicht gebeugt|Langsam öffnen, Gewichte nicht aufschlagen lassen'],
+  ['dips_chest','Dips (Brust)','Oberkörper nach vorne lehnen|Bis Oberarme etwa parallel absenken|Schultern nicht hochziehen'],
+ ]],
+ ['Schultern',[
+  ['db_ohp','Schulterdrücken (KH)','Rücken an die Lehne, Bauch fest|Hanteln auf Ohrhöhe starten|Nach oben drücken, kein Hohlkreuz'],
+  ['ohp','Schulterdrücken (LH)','Stange auf Schlüsselbein, Po und Bauch fest|Kopf kurz zurück, Stange gerade hoch|Oben Kopf durch die Arme'],
+  ['shoulder_press_m','Schulterpresse (Maschine)','Griffe auf Schulterhöhe|Kontrolliert drücken|Ellbogen leicht vor dem Körper'],
+  ['lat_raise_cable','Seitheben Kabelzug','Kabel ganz unten, seitlich zum Turm stehen|Arm leicht gebeugt bis Schulterhöhe heben|Langsam ablassen, Spannung halten',true],
+  ['lat_raise_db','Seitheben (KH)','Leicht nach vorne gebeugt|Ellbogen führen, bis Schulterhöhe|Kein Schwung, langsam runter'],
+  ['lat_raise_m','Seitheben (Maschine)','Polster an die Oberarme|Bis Schulterhöhe heben|Oben kurz halten'],
+  ['reverse_pec','Reverse Pec Deck','Brust an die Lehne, Griffe auf Schulterhöhe|Arme leicht gebeugt nach hinten führen|Bewegung aus der hinteren Schulter'],
+  ['face_pull','Face Pulls','Seil auf Augenhöhe|Zum Gesicht ziehen, Ellbogen hoch|Am Ende Hände nach aussen drehen'],
+  ['rear_delt_db','Vorgebeugtes Seitheben (KH)','Oberkörper fast waagrecht|Arme seitlich heben, Ellbogen leicht gebeugt|Leichtes Gewicht, sauber'],
+ ]],
+ ['Trizeps',[
+  ['tri_pushdown','Trizeps-Pushdown','Ellbogen eng am Körper fixieren|Nach unten bis Arme gestreckt|Nur die Unterarme bewegen'],
+  ['tri_rope','Pushdown mit Seil','Ellbogen fixiert|Unten Seil auseinanderziehen|Langsam zurück bis ca. 90°'],
+  ['overhead_ext','Überkopf-Trizepsstrecken (Kabel)','Rücken zum Kabel, Seil hinter dem Kopf|Ellbogen zeigen nach vorne|Arme über Kopf strecken'],
+  ['skullcrusher','French Press / Skullcrusher','Stange zur Stirn oder hinter den Kopf absenken|Ellbogen zeigen zur Decke|Nur im Ellbogen bewegen'],
+  ['dips','Dips (Trizeps)','Oberkörper aufrecht|Ellbogen nach hinten, nah am Körper|Oben strecken ohne durchzudrücken'],
+  ['close_bench','Enges Bankdrücken','Griff schulterbreit|Ellbogen eng am Körper|Zur unteren Brust absenken'],
+  ['kickback','Trizeps-Kickbacks','Oberkörper vorgebeugt, Oberarm parallel zum Boden|Unterarm nach hinten strecken|Oberarm bleibt still',true],
+ ]],
+ ['Rücken',[
+  ['lat_pulldown','Latziehen','Griff etwas breiter als schulterbreit|Zur oberen Brust ziehen, Brust raus|Ellbogen nach unten führen, kein Schwung'],
+  ['lat_pulldown_close','Latziehen eng','Enger Griff|Zur Brust ziehen, Ellbogen nah am Körper|Oben voll strecken'],
+  ['pullup','Klimmzüge','Aus dem toten Hang starten|Brust zur Stange, Schulterblätter runter|Kontrolliert absenken'],
+  ['assisted_pullup','Klimmzüge (unterstützt)','Unterstützung so wählen, dass 6–10 Wdh. gehen|Brust zur Stange|Langsam absenken'],
+  ['row_close','Enges Rudern Kabelzug','Aufrecht sitzen, Knie leicht gebeugt|Griff zum Bauchnabel ziehen|Schulterblätter zusammen, nicht zurücklehnen'],
+  ['row_wide','Breites Rudern Kabelzug','Breiter Griff|Zur unteren Brust ziehen, Ellbogen nach aussen|Schulterblätter zusammen'],
+  ['db_row','Kurzhantelrudern einarmig','Knie und Hand auf der Bank, Rücken gerade|Hantel zur Hüfte ziehen|Unten voll strecken',true],
+  ['tbar_row','T-Bar-Rudern','Rücken gerade, Oberkörper ca. 45°|Zum Bauch ziehen|Kein Schwung aus der Hüfte'],
+  ['row_machine','Rudermaschine','Brust ans Polster|Ellbogen nach hinten ziehen|Langsam zurück'],
+  ['pullover','Pullover am Kabel','Arme fast gestreckt|Seil im Bogen bis zu den Oberschenkeln ziehen|Oberkörper still, Lat spüren'],
+ ]],
+ ['Bizeps',[
+  ['preacher','Preacher Curls','Achseln eng ans Polster|Langsam ganz absenken|Oben kurz anspannen'],
+  ['hammer','Hammer Curls','Neutraler Griff, Daumen oben|Ellbogen am Körper|Ohne Schwung heben'],
+  ['db_curl','Kurzhantel-Curls','Ellbogen fix am Körper|Beim Hochgehen Handgelenk nach aussen drehen|Langsam ablassen'],
+  ['ez_curl','SZ-Curls','Schulterbreiter Griff|Ellbogen bleiben still|Kein Schwung aus dem Rücken'],
+  ['cable_curl','Curls am Kabel','Ellbogen am Körper|Spannung über die ganze Bewegung|Unten fast ganz strecken'],
+  ['incline_curl','Schrägbank-Curls','Bank ca. 45°, Arme hängen nach unten|Curlen ohne die Ellbogen nach vorne zu nehmen|Grosse Dehnung unten'],
+  ['bayesian_curl','Bayesian Curls','Rücken zum Kabel, Arm hinter dem Körper|Nach vorne oben curlen|Starke Dehnung, langsam',true],
+  ['preacher_m','Bizepsmaschine','Sitz so, dass Achseln am Polster sind|Ganz strecken|Oben kurz halten'],
+ ]],
+ ['Beine',[
+  ['leg_press','Beinpresse','Füsse schulterbreit mittig auf der Platte|Bis ca. 90° absenken, Po bleibt unten|Knie oben nicht durchdrücken'],
+  ['squat','Kniebeugen','Stange auf dem oberen Rücken, Brust raus|Hüfte nach hinten, Knie nach aussen|Mindestens bis parallel, Fersen am Boden'],
+  ['hack_squat','Hackenschmidt','Rücken ans Polster|Tief gehen, Knie über den Zehen ist ok|Über den ganzen Fuss drücken'],
+  ['goblet','Goblet Squat','Hantel vor der Brust|Aufrecht tief in die Hocke|Ellbogen zwischen die Knie'],
+  ['lunges','Ausfallschritte','Grosser Schritt nach vorne|Hinteres Knie Richtung Boden|Vorderes Knie stabil über dem Fuss',true],
+  ['bulgarian','Bulgarian Split Squats','Hinterer Fuss auf der Bank|Senkrecht nach unten gehen|Leicht nach vorne lehnen für mehr Po',true],
+  ['leg_ext','Leg Extension','Polster knapp über dem Fussgelenk|Oben kurz halten|Langsam absenken'],
+ ]],
+ ['Beinbeuger & Po',[
+  ['rdl','Rumänisches Kreuzheben (KH)','Knie leicht gebeugt|Hüfte nach hinten schieben, Rücken gerade|Hanteln nah an den Beinen, bis Zug im Beinbeuger'],
+  ['rdl_bb','Rumänisches Kreuzheben (LH)','Knie leicht gebeugt|Hüfte nach hinten, Stange am Bein entlang|Rücken gerade, oben Po anspannen'],
+  ['deadlift','Kreuzheben','Stange über der Fussmitte|Rücken gerade, Brust raus|Mit den Beinen drücken, Stange nah am Körper'],
+  ['leg_curl','Leg Curl','Polster über der Ferse|Ganz anziehen, Hüfte bleibt unten|Langsam zurück'],
+  ['seated_leg_curl','Leg Curl sitzend','Knie auf den Drehpunkt ausrichten|Fersen unter den Sitz ziehen|Kontrolliert zurück'],
+  ['hip_thrust','Hip Thrust','Schulterblätter auf der Bank|Hüfte hoch, bis der Körper gerade ist|Oben Po 1 s anspannen'],
+  ['abductor','Abduktoren-Maschine','Aufrecht oder leicht nach vorne gelehnt|Beine kontrolliert nach aussen|Langsam zurück'],
+  ['back_ext','Rückenstrecker','Hüfte am Polster|Mit geradem Rücken absenken|Bis der Körper gerade ist, nicht überstrecken'],
+ ]],
+ ['Waden',[
+  ['calf_standing','Wadenheben stehend','Fussballen auf der Kante|Ganz nach oben, kurz halten|Tief absenken für Dehnung'],
+  ['calf_seated','Wadenheben sitzend','Polster auf den Oberschenkeln|Ganz hoch, kurz halten|Langsam tief'],
+  ['calf_press','Wadenheben Beinpresse','Fussballen am unteren Plattenrand|Platte mit den Waden wegdrücken|Knie leicht gebeugt'],
+ ]],
+ ['Bauch',[
+  ['crunch_cable','Kabel-Crunches','Kniend, Seil am Kopf|Mit dem Bauch einrollen|Hüfte bleibt still'],
+  ['leg_raise','Beinheben hängend','An der Stange hängen, kein Schwung|Beine heben, Becken einrollen|Langsam absenken'],
+  ['ab_machine','Bauchmaschine','Sitz passend einstellen|Mit dem Bauch einrollen, nicht mit den Armen ziehen|Langsam zurück'],
+  ['plank','Plank (Sek.)','Ellbogen unter den Schultern|Körper gerade, Po nicht hoch|Bauch und Po anspannen'],
+ ]],
+];
+
+/* Cardio: [id, Name, Icon, Felder] – mögliche Felder: min, dist, floors, spm, speed, incline, level, kcal, hr */
+window.CARDIO = [
+ ['cardio_stair','Stairmaster','🪜',['min','floors','spm','kcal','hr']],
+ ['cardio_tread','Laufband','🏃',['min','dist','speed','incline','kcal','hr']],
+ ['cardio_bike','Velo / Ergometer','🚴',['min','dist','level','kcal','hr']],
+ ['cardio_ell','Crosstrainer','⛷️',['min','level','kcal','hr']],
+ ['cardio_rower','Rudergerät','🚣',['min','dist','kcal','hr']],
+ ['cardio_run','Laufen draussen','👟',['min','dist','kcal','hr']],
+ ['cardio_walk','Spazieren','🚶',['min','dist','kcal']],
+ ['cardio_other','Andere','❤️',['min','kcal','hr']],
+];
+window.CARDIO_FIELDS = {min:['Min.',1],dist:['km',0.1],floors:['Etagen',1],spm:['Stufen/Min',1],speed:['km/h',0.1],incline:['Steigung %',0.5],level:['Stufe',1],kcal:['kcal',1],hr:['Ø Puls',1]};
