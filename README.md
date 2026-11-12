@@ -7,6 +7,8 @@ Offline-fähige Web-App (PWA) zum Tracken von Workouts.
 - Einseitige Übungen (links/rechts), Notizen pro Übung (Sitzeinstellung usw.)
 - Ausführung mit Bildanimation, Tipps und Video-Link
 - Cardio (Stairmaster, Laufband, Velo …), Körpergewicht, Rekorde, Verlauf
+- Ghost-Modus, Sprachsteuerung, Scheiben-Rechner, Schnell-Training mit Supersätzen
+- Muskel-Heatmap, geschätztes 1RM mit Stärke-Level, Serien und Abzeichen, Jahresrückblick, Rekord-Bilder zum Teilen
 - Startet sofort und funktioniert offline, inklusive aller Übungsbilder
 - Alle Daten bleiben lokal auf dem Gerät – Backup/Restore unter ⚙︎ → Daten & Backup
 
