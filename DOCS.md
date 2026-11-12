@@ -23,6 +23,16 @@ Eine eigenständige Web-App (PWA) zum Tracken des Trainings. Sie wird über GitH
 - **Garmin / Strava:** Jedes Training (im Verlauf und nach dem Abschliessen) lässt sich als .fit-Datei exportieren und in Garmin Connect («Daten importieren») oder bei Strava hochladen. Bei Garmin erscheint es als Krafttraining mit Übungstyp, Sätzen, Wdh. und Gewicht. Die Satz-Zeiten sind geschätzt (gleichmässig über die Trainingsdauer verteilt), weil die App keine Zeit pro Satz speichert.
 - **Korrigieren:** Gespeicherte Trainings lassen sich nachträglich bearbeiten, inklusive Datum und Zeit.
 - **Bedienung wie eine App:** Tab-Leiste unten, die Zurück-Taste bzw. Wischgeste schliesst Fenster und führt zur Startseite, Zahlenfelder werden beim Antippen markiert, und ein Hinweis erklärt die Installation auf dem Homescreen.
+- **Ghost-Modus:** Unter jedem Satz steht der Wert vom letzten Training (👻). Sobald du Wdh. einträgst, zeigt die App, ob du besser, gleich oder schwächer bist, und ein Balken vergleicht das Volumen Satz für Satz.
+- **Sprachsteuerung:** «🎤 Ansagen» bei der Übung antippen und z. B. «80 Kilo, 8 Wiederholungen» sagen. Der nächste offene Satz wird ausgefüllt und abgehakt. «Nochmal» übernimmt die Werte vom letzten Mal.
+- **Scheiben-Rechner:** Zeigt für ein Zielgewicht, welche Scheiben pro Seite auf die Stange gehören. Stangengewicht und vorhandene Scheiben sind einstellbar.
+- **Schnell-Training:** «⏱ Wenig Zeit» auf der Startseite kürzt den heutigen Tag auf 15 bis 50 Minuten: Supersätze aus Übungen für verschiedene Muskeln, weniger Sätze, und erst zuletzt fallen Übungen weg. Der Plan selbst bleibt unverändert.
+- **Supersätze:** Zwei Übungen lassen sich im Training verbinden («⛓ Supersatz»). Die Pause startet dann erst nach der zweiten Übung.
+- **Muskel-Heatmap:** Im Tab Fortschritt zeigt eine Körperansicht von vorne und hinten, wie viele Sätze jeder Muskel diese Woche, letzte Woche oder im Schnitt der letzten 4 Wochen bekommen hat.
+- **Geschätztes 1RM und Stärke-Level:** Pro Übung wird das 1RM aus dem besten Satz geschätzt (Epley-Formel) und für gängige Übungen anhand des Körpergewichts von Anfänger bis Elite eingeordnet.
+- **Serie und Abzeichen:** Wochen in Folge mit mindestens einem Training, dazu 37 Abzeichen (Anzahl Trainings, erste 100 kg, Tonnage, Rekorde, Cardio usw.). Neue Abzeichen erscheinen nach dem Training.
+- **Jahresrückblick:** Trainings, Stunden, bewegtes Gewicht mit Vergleich, Lieblingsübung, längste Serie, grösster Fortschritt und mehr, für jedes Jahr mit Daten.
+- **Bilder zum Teilen:** Ein neuer Rekord und der Jahresrückblick lassen sich als Bild teilen oder speichern. Das Bild entsteht auf dem Gerät.
 - **Offline:** Die App startet sofort aus dem Speicher, auch bei schlechtem Empfang. Alle Übungsbilder werden beim ersten Start im Hintergrund gespeichert. Gibt es eine neue Version, erscheint auf der Startseite «Neue Version verfügbar».
 
 ## Technik
@@ -31,10 +41,11 @@ Reines HTML, CSS und JavaScript, ohne Framework und ohne Build.
 
 | Datei | Inhalt |
 |---|---|
-| `index.html` | Die ganze App (etwa 690 Zeilen) |
+| `index.html` | Die Grund-App: Training, Verlauf, Fortschritt, Plan, Einstellungen |
+| `features.js` | Zusatzfunktionen: Heatmap, Abzeichen, Jahresrückblick, 1RM, Ghost, Scheiben-Rechner, Sprache, Schnell-Training, Bilder. Wird nach dem Hauptskript geladen und über `window.GTX` eingehängt. Fehlt die Datei, läuft die Grund-App weiter. |
 | `exercises.js` | Übungsbibliothek (`CATALOG`) und Cardio-Arten (`CARDIO`), selbst editierbar |
 | `fit.js` | FIT-Export für Garmin/Strava, inklusive Zuordnung der Übungen zu Garmins Übungstypen (`EX`) |
-| `sw.js` | Service Worker für den Offline-Modus: App-Dateien kommen sofort aus dem Cache `gym-tracker-v5` und werden im Hintergrund erneuert, Bilder liegen im Cache `gym-tracker-img` |
+| `sw.js` | Service Worker für den Offline-Modus: App-Dateien kommen sofort aus dem Cache `gym-tracker-v6` und werden im Hintergrund erneuert, Bilder liegen im Cache `gym-tracker-img` |
 | `manifest.webmanifest`, Icons | Für die Installation auf dem Homescreen |
 | `img/` | Übungsbilder `<id>_0.jpg` und `<id>_1.jpg` aus [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (Public Domain), etwa 2,6 MB |
 
@@ -50,6 +61,8 @@ Die Daten liegen im localStorage des Browsers:
 | `gt_lastBackup` | Zeitpunkt des letzten Backups |
 | `gt_hintOff` | Installationshinweis wurde weggetippt |
 | `gt_imgCache` | Merker, dass alle Bilder offline gespeichert sind |
+
+Die Zusatzfunktionen berechnen alles aus den vorhandenen Trainings. Das Format der gespeicherten Trainings ist unverändert. Neu sind nur ein paar Einstellungen in `gt_db` (`ghost`, `voice`, `voiceDone`, `sex`, `barKg`, `bars`, `plates`) und das Feld `ss` (Supersatz) im laufenden Training.
 
 Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.html`). Das erleichtert einen späteren Wechsel auf IndexedDB.
 
@@ -85,7 +98,11 @@ Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.htm
 - **Datenverlust möglich:** Die Daten liegen nur auf einem Gerät. Wer die Browserdaten löscht oder das Handy wechselt, braucht ein Backup. Auf dem iPhone kann Safari Daten nicht installierter Webseiten nach etwa 7 Tagen ohne Nutzung löschen. Deshalb unbedingt über den Homescreen nutzen.
 - **Timer im Hintergrund:** Ist der Bildschirm gesperrt oder die App im Hintergrund, kommt kein Ton (iOS pausiert JavaScript). «Bildschirm anlassen» hilft als Workaround. Auf Android lässt sich in den Einstellungen eine Benachrichtigung am Pausenende einschalten; sie kann im Hintergrund verzögert kommen.
 - **Bilder ungenau:** Ein paar zeigen eine Variante, z. B. Kurzhantel statt Kabel beim Seitheben. Die Fotos haben einen weissen Hintergrund im dunklen Design. Die Cardio-Arten haben ein Symbol statt eines Bildes.
-- **Code:** Alles steht in einer grossen Datei, und es gibt keine automatischen Tests im Repo.
+- **Sprachsteuerung hängt vom Browser ab:** Die Spracherkennung kommt vom Browser bzw. Betriebssystem. In Chrome und meist auch in Safari wird die Aufnahme dafür an Google bzw. Apple geschickt und braucht Internet. Ohne Unterstützung wird der Knopf ausgeblendet. In einer installierten App auf dem iPhone funktioniert sie je nach iOS-Version nicht.
+- **Stärke-Level ist eine grobe Orientierung:** Die Richtwerte sind gerundete Vielfache des Körpergewichts. Maschinen unterscheiden sich stark, und für Frauen wird pauschal mit 60 % gerechnet.
+- **Heatmap zählt nur den Hauptmuskel:** Bankdrücken zählt für die Brust, nicht anteilig für Trizeps und Schultern.
+- **Zeitschätzung im Schnell-Training:** Sie rechnet mit 45 s pro Satz plus Pause und Wechselzeit und gleicht sich an deine letzten Trainings des gleichen Tages an. Sie bleibt eine Schätzung.
+- **Code:** Die App besteht aus zwei grossen Dateien, und es gibt keine automatischen Tests im Repo.
 - **Nicht auf einem echten Handy getestet:** Getestet in Chrome mit simulierten Handys (iPhone 14, Pixel 7), nicht in Safari und nicht auf einem echten Gerät.
 - **Aufräumen:** Das alte Repo `gym-tracker` und das Claude-Artefakt können gelöscht werden, falls sie noch existieren.
 
@@ -99,10 +116,9 @@ Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.htm
 
 ### 2. Fürs Training
 
-- Sätze pro Muskelgruppe und Woche: die wichtigste Kennzahl für den Muskelaufbau (Ziel etwa 10–20 Sätze).
 - RIR/RPE pro Satz (wie viele Wdh. noch gegangen wären) für eine bessere Steigerung.
 - Aufwärmsätze, die nicht in die Statistik zählen.
-- Supersätze (zwei Übungen im Wechsel), damit die Sessions noch kürzer werden.
+- Heatmap mit anteiliger Zählung der Hilfsmuskeln.
 - Deload-Hinweis, wenn die Werte mehrere Wochen stagnieren.
 
 ### 3. Bedienung

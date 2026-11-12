@@ -168,7 +168,9 @@ CARDIO.forEach(([id,name,icon,fields])=>CARD[id]={id,name,icon,fields,muscle:'Ca
 const isCardio = id => !!CARD[id] || String(id).startsWith('cardio_');
 
 /* ================= State ================= */
-const APP_VERSION='5';
+const APP_VERSION='6';
+/* Zusatzfunktionen aus features.js (Heatmap, Abzeichen, Ghost usw.). Fehlt die Datei, läuft die App ohne sie weiter. */
+const fx=(n,...a)=>window.GTX&&GTX[n]?GTX[n](...a):'';
 const DEF_SETTINGS={step:2.5,defRest:90,defSets:3,defRepMin:8,defRepMax:12,autoTimer:true,autoInc:true,sound:true,vibrate:true,wake:true,notify:false};
 const S = { db:null, plan:null, planLoaded:false, sessions:[], sessLoaded:false,
   lib:{custom:[],notes:{}}, settings:{...DEF_SETTINGS}, body:{entries:[]},
@@ -285,15 +287,16 @@ async function finish(){
     const sets=it.rows.filter(r=>r.done||(num(r.reps)||0)>0).map(r=>{ const s={kg:num(r.kg)||0,reps:num(r.reps)||0}; if(it.uni) s.repsR=num(r.repsR)??s.reps; return s });
     if(sets.length) entries.push({exId:it.exId,name:it.name,muscle:it.muscle||'',uni:!!it.uni,sets}) });
   if(!entries.length){toast('Noch nichts eingetragen');return}
+  const preBadges=fx('badgeIds')||null;
   const prs=[]; entries.forEach(e=>{ if(!e.sets) return; const prev=bestFor(e.exId); if(!prev) return;
-    const top=e.sets.reduce((a,b)=>e1rm(b)>e1rm(a)?b:a); if(e1rm(top)>prev.v+0.01) prs.push({name:e.name,st:top}) });
+    const top=e.sets.reduce((a,b)=>e1rm(b)>e1rm(a)?b:a); if(e1rm(top)>prev.v+0.01) prs.push({name:e.name,exId:e.exId,st:top,prev:prev.st}) });
   const id=new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14);
   const dur=Math.max(1,Math.round((Date.now()-S.draft.startedAt)/60000));
   const doc={date:new Date().toISOString(),dayId:S.draft.dayId,dayName:S.draft.dayName,durationMin:dur,note:S.draft.note||'',entries};
   try{ await write('sessions/'+id,doc) }catch(e){return}
   S.summary={id,dayName:doc.dayName,dur,sets:entries.reduce((n,e)=>n+(e.sets?e.sets.length:0),0),
     vol:Math.round(entries.reduce((v,e)=>v+(e.sets?e.sets.reduce((a,s)=>a+setVol(s),0):0),0)),
-    cardio:entries.filter(e=>e.cardio).reduce((m,e)=>m+(e.cardio.min||0),0),prs};
+    cardio:entries.filter(e=>e.cardio).reduce((m,e)=>m+(e.cardio.min||0),0),prs,preBadges};
   S.draft=null; saveDraft(); stopTimer(); S.view='summary'; render(); scrollTo(0,0) }
 
 /* ================= Timer & Wake Lock ================= */
@@ -369,14 +372,14 @@ function vHome(){
       <div class="muted" style="margin-bottom:12px">${(nd.exercises||[]).map(e=>esc(e.name)).join(' · ')||'Keine Übungen'}</div>
       <button class="btn pri" data-act="start" data-d="${esc(nid)}">Starten</button>
       <div class="row" style="margin-top:10px">${days().filter(d=>d.id!==nid).map(d=>`<button class="btn sm ghost" data-act="start" data-d="${esc(d.id)}">${esc(d.name)}</button>`).join('')}
-      <button class="btn sm ghost" data-act="start-free">Frei</button><button class="btn sm ghost" data-act="start-cardio">🏃 Nur Cardio</button></div></div>`;
+      ${window.GTX?`<button class="btn sm ghost" data-act="x-quick" data-d="${esc(nid)}">⏱ Wenig Zeit</button>`:''}<button class="btn sm ghost" data-act="start-free">Frei</button><button class="btn sm ghost" data-act="start-cardio">🏃 Nur Cardio</button></div></div>`;
   }
   const ws=weekStart(), wkS=S.sessions.filter(s=>new Date(s.date)>=ws);
   const wk=wkS.filter(s=>(s.entries||[]).some(e=>e.sets)).length;
   const cmin=wkS.reduce((m,s)=>m+(s.entries||[]).reduce((a,e)=>a+(e.cardio&&e.cardio.min||0),0),0);
   const bw=S.body.entries.length?S.body.entries[S.body.entries.length-1]:null;
   h+=`<div class="row" style="margin-bottom:12px"><div class="stat"><b>${wk}</b><span class="muted">Krafttrainings</span></div><div class="stat"><b>${Math.round(cmin)}</b><span class="muted">Cardio-Min.</span></div><div class="stat"><b>${bw?esc(bw.kg):'–'}</b><span class="muted">kg Körper</span></div></div>
-    <div class="muted" style="text-align:center;margin:-4px 0 12px">diese Woche</div>`;
+    <div class="muted" style="text-align:center;margin:-4px 0 12px">diese Woche</div>`+fx('home');
   const lb=lsGet('gt_lastBackup');
   if(S.sessions.length>=3&&(!lb||Date.now()-new Date(lb)>14*864e5)) h+=`<div class="card between"><span class="muted">${lb?'Letztes Backup ist über 2 Wochen her.':'Noch kein Backup gemacht.'}</span><button class="btn sm" data-act="backup">Backup</button></div>`;
   const rec=S.sessions.slice(0,4);
@@ -400,8 +403,8 @@ function vWorkout(){
         <div class="tools"><button class="btn sm ${it.done?'pri':''}" style="${it.done?'width:auto':''}" data-act="c-done" data-i="${i}">${it.done?'✓ Erledigt':'Als erledigt markieren'}</button>${moveTools}</div></div>`;
       return }
     const last=lastFor(it.exId), doneN=it.rows.filter(r=>r.done).length, all=doneN===it.rows.length;
-    h+=`<div class="card ${all?'alldone':''}"><div class="exhead">${thumbHTML(it.exId)}<div class="grow"><div class="between"><div class="exname">${esc(it.name)}</div><span class="muted">${doneN}/${it.rows.length}</span></div>
-      <div class="chips"><span class="chip">${it.sets}×${it.repMin}–${it.repMax}</span><button class="chip hl" data-act="rest-edit" data-i="${i}">⏱ ${fmtT(it.rest)}</button>${it.uni?'<span class="chip hl">einseitig</span>':''}</div></div></div>`;
+    h+=`<div class="card ${all?'alldone':''}${fx('cardCls',i)}"><div class="exhead">${thumbHTML(it.exId)}<div class="grow"><div class="between"><div class="exname">${esc(it.name)}</div><span class="muted">${doneN}/${it.rows.length}</span></div>
+      <div class="chips"><span class="chip">${it.sets}×${it.repMin}–${it.repMax}</span><button class="chip hl" data-act="rest-edit" data-i="${i}">⏱ ${fmtT(it.rest)}</button>${it.uni?'<span class="chip hl">einseitig</span>':''}${fx('exChips',i,it)}</div></div></div>`;
     if(S.restEdit===i) h+=`<div class="restbox"><button class="btn sm ghost" data-act="rest-m" data-i="${i}">−15 s</button><b>${fmtT(it.rest)}</b><button class="btn sm ghost" data-act="rest-p" data-i="${i}">+15 s</button></div>
       <div class="row" style="margin-top:6px">${planDayEx()?`<button class="btn xs ghost" data-act="rest-save" data-i="${i}">Im Plan speichern</button>`:''}<button class="btn xs" data-act="rest-close">Fertig</button></div>`;
     h+= last?`<div class="muted" style="margin-top:8px">Letztes Mal (${fmtD(last.date)}): <span style="color:var(--txt)">${last.sets.map(fmtSet).join(' · ')}</span></div>`
@@ -415,9 +418,9 @@ function vWorkout(){
         <td><div class="kgwrap"><button class="pm" data-act="kgm" data-i="${i}" data-j="${j}">−</button><input type="number" inputmode="decimal" step="0.25" data-k="kg${i}_${j}" data-f="kg" data-i="${i}" data-j="${j}" value="${esc(r.kg)}" placeholder="${ls?esc(ls.kg):'kg'}"><button class="pm" data-act="kgp" data-i="${i}" data-j="${j}">+</button></div></td>
         <td style="width:${it.uni?18:24}%"><input type="number" inputmode="numeric" data-k="rp${i}_${j}" data-f="reps" data-i="${i}" data-j="${j}" value="${esc(r.reps)}" placeholder="${ph('reps')}"></td>
         ${it.uni?`<td style="width:18%"><input type="number" inputmode="numeric" data-k="rr${i}_${j}" data-f="repsR" data-i="${i}" data-j="${j}" value="${esc(r.repsR)}" placeholder="${ph('repsR')}"></td>`:''}
-        <td style="width:48px"><button class="chk" data-act="done" data-i="${i}" data-j="${j}">✓</button></td></tr>` });
-    h+=`</table><div class="tools"><button class="btn xs ghost" data-act="addset" data-i="${i}">+ Satz</button>${it.rows.length>1?`<button class="btn xs ghost" data-act="delset" data-i="${i}">− Satz</button>`:''}
-      <button class="btn xs ghost" data-act="w-swap" data-i="${i}">⇄ Tauschen</button><button class="btn xs ghost ${it.uni?'on':''}" data-act="w-uni" data-i="${i}">Einseitig</button>${moveTools}</div></div>` });
+        <td style="width:48px"><button class="chk" data-act="done" data-i="${i}" data-j="${j}">✓</button></td></tr>${fx('ghostRow',i,j,it,r,last)}` });
+    h+=`</table>${fx('ghostBar',i,it,last)}<div class="tools"><button class="btn xs ghost" data-act="addset" data-i="${i}">+ Satz</button>${it.rows.length>1?`<button class="btn xs ghost" data-act="delset" data-i="${i}">− Satz</button>`:''}
+      <button class="btn xs ghost" data-act="w-swap" data-i="${i}">⇄ Tauschen</button><button class="btn xs ghost ${it.uni?'on':''}" data-act="w-uni" data-i="${i}">Einseitig</button>${fx('exTools',i,it)}${moveTools}</div></div>` });
   h+=`<div class="row" style="margin-bottom:12px"><button class="btn ghost" style="flex:1" data-act="w-add">+ Übung</button><button class="btn ghost" style="flex:1" data-act="w-cardio">+ Cardio</button></div>
     <div class="card"><div class="muted" style="margin-bottom:6px">Notiz zum Training</div><textarea data-k="wnote" data-wnote="1" placeholder="Wie lief's? Energie, Schmerzen, …">${esc(D.note||'')}</textarea></div>
     <button class="btn pri" data-act="finish">Training abschliessen</button>
@@ -427,7 +430,7 @@ function vWorkout(){
 function vSummary(){ const s=S.summary;
   return `<div class="card" style="text-align:center"><div style="font-size:42px">💪</div><div class="big">${esc(s.dayName)} erledigt</div>
     <div class="row" style="margin:12px 0"><div class="stat"><b>${s.dur}</b><span class="muted">Min.</span></div><div class="stat"><b>${s.sets}</b><span class="muted">Sätze</span></div>${s.cardio?`<div class="stat"><b>${Math.round(s.cardio)}</b><span class="muted">Cardio-Min.</span></div>`:`<div class="stat"><b>${s.vol}</b><span class="muted">kg Volumen</span></div>`}</div>
-    ${s.prs.length?`<div style="text-align:left"><div class="muted" style="margin-bottom:4px">Neue Rekorde 🏆</div>${s.prs.map(p=>`<div class="badge pr" style="margin-right:6px">${esc(p.name)}: ${fmtSet(p.st)}</div>`).join('')}</div>`:''}
+    ${s.prs.length?`<div style="text-align:left"><div class="muted" style="margin-bottom:4px">Neue Rekorde 🏆</div>${s.prs.map(p=>`<div class="badge pr" style="margin-right:6px">${esc(p.name)}: ${fmtSet(p.st)}</div>`).join('')}</div>`:''}${fx('summary',s)}
     <button class="btn ghost" style="margin-top:16px;width:100%" data-act="fit" data-id="${esc(s.id||'')}">⌚ Für Garmin / Strava exportieren</button>
     <button class="btn pri" style="margin-top:10px" data-act="nav" data-v="home">Fertig</button></div>` }
 
@@ -458,7 +461,7 @@ function vEditSess(){ const s=S.editSess;
   return h }
 
 function vProgress(){
-  let h='<div class="sec">Körpergewicht</div><div class="card">';
+  let h=fx('progressTop')+'<div class="sec">Körpergewicht</div><div class="card">';
   const E=S.body.entries, last=E[E.length-1];
   h+=`<div class="row"><input type="number" inputmode="decimal" step="0.1" id="bwIn" data-k="bw" placeholder="${last?esc(last.kg):'kg'}" style="flex:1"><button class="btn" data-act="bw-add">Eintragen</button></div>`;
   if(E.length){ const ago=d=>{const t=new Date(Date.now()-d*864e5); return E.filter(x=>new Date(x.d)<=t).pop()};
@@ -488,9 +491,9 @@ function vProgress(){
     h+=`<div class="card prog"><div class="exhead">${thumbHTML(id)}<div class="grow"><div class="between"><div class="exname">${esc(nm)}</div>${pts.length?`<button class="btn xs ghost" data-act="prog-tog" data-id="${esc(id)}">${S.openProg[id]?'Weniger':'Details'}</button>`:''}</div>`;
     if(!pts.length){h+='<div class="muted">Noch keine Daten.</div></div></div></div>';return}
     const pr=pts.reduce((a,b)=>b.e1>a.e1?b:a), diff=r2(+pts[0].best.kg-+pts[pts.length-1].best.kg);
-    h+=`<div class="muted">Rekord <span style="color:var(--txt)">${fmtSet(pr.best)}</span> · ${pts.length}× · ${diff>0?`<span class="up">+${diff} kg</span>`:diff<0?`<span class="down">${diff} kg</span>`:'±0 kg'}</div></div></div>`;
+    h+=`<div class="muted">Rekord <span style="color:var(--txt)">${fmtSet(pr.best)}</span> · ${pts.length}× · ${diff>0?`<span class="up">+${diff} kg</span>`:diff<0?`<span class="down">${diff} kg</span>`:'±0 kg'}</div>${fx('progExtra',id,pr)}</div></div>`;
     h+=spark(pts.slice(0,30).reverse().map(p=>p.e1));
-    if(S.openProg[id]) h+=`<table><tr><th>Datum</th><th>Bester Satz</th><th>Volumen</th></tr>${pts.slice(0,10).map(p=>`<tr><td>${fmtD(p.date)}</td><td>${fmtSet(p.best)} kg</td><td>${Math.round(p.vol)} kg</td></tr>`).join('')}</table>`;
+    if(S.openProg[id]) h+=`<table><tr><th>Datum</th><th>Bester Satz</th><th>Volumen</th></tr>${pts.slice(0,10).map(p=>`<tr><td>${fmtD(p.date)}</td><td>${fmtSet(p.best)} kg</td><td>${Math.round(p.vol)} kg</td></tr>`).join('')}</table>${fx('progDetails',id,pr)}`;
     h+='</div>' });
   return h }
 
@@ -524,6 +527,7 @@ function vSettings(){ const s=ST(), st=+s.step||2.5;
     <div class="sec">Standard für neue Übungen</div><div class="card">
     ${numRow('defSets','Sätze')}${numRow('defRepMin','Wdh. min')}${numRow('defRepMax','Wdh. max')}${numRow('defRest','Pause (Sekunden)',15)}</div>`;
   const cust=S.lib.custom||[];
+  h+=fx('settings');
   h+=`<div class="sec">Eigene Übungen</div><div class="card">${cust.length?cust.map(c=>`<div class="between" style="padding:5px 0"><span>${esc(c.name)} <span class="chip">${esc(c.muscle)}</span></span><button class="btn xs danger" data-act="cust-del" data-id="${esc(c.id)}">${S.confirm==='cd'+c.id?'Sicher?':'✕'}</button></div>`).join(''):'<div class="muted">Eigene Übungen legst du beim Hinzufügen oder Tauschen an.</div>'}</div>`;
   const lb=lsGet('gt_lastBackup');
   h+=`<div class="sec">Daten & Backup</div><div class="card"><div class="muted" style="margin-bottom:10px">Deine Daten sind nur auf diesem Gerät gespeichert. Mach regelmässig ein Backup, z. B. in iCloud oder Google Drive. ${lb?'Letztes Backup: '+fmtD(lb)+'.':'Noch kein Backup gemacht.'}</div>
@@ -537,6 +541,7 @@ function vSettings(){ const s=ST(), st=+s.step||2.5;
 function vModal(){ const M=S.modal;
   if(M.mode==='info') return vInfo(M.ex);
   if(M.mode==='fit') return vFitHelp(M);
+  if(M.mode.startsWith('x-')) return fx('modal',M);
   const title={'w-swap':'Übung tauschen','w-add':'Übung hinzufügen','w-cardio':'Cardio hinzufügen','pe-swap':'Übung im Plan tauschen','pe-add':'Übung zum Plan hinzufügen','pe-cardio':'Cardio zum Plan hinzufügen'}[M.mode];
   const workout=M.mode.startsWith('w-')&&planDayEx();
   return `<div class="modal" data-act="m-close-bg"><div class="panel"><div class="panel-h"><div class="between"><b>${title}</b><button class="btn xs ghost" data-act="m-close">✕</button></div>
@@ -578,7 +583,7 @@ function vInfo(id){ const i=exInfo(id), best=bestFor(id), hist=[];
   S.sessions.forEach(s=>{ const e=(s.entries||[]).find(x=>x.exId===id); if(e&&hist.length<5) hist.push({date:s.date,e}) });
   return `<div class="modal" data-act="m-close-bg"><div class="panel"><div class="panel-h between"><b>${esc(i.name)}</b><button class="btn xs ghost" data-act="m-close">✕</button></div>
     <div class="panel-b">${i.img?imgHTML(id,'hero'):`<div class="card" style="text-align:center;font-size:40px">${i.cardio?i.icon:'🏋️'}</div>`}
-    <div class="chips" style="margin-top:10px"><span class="chip">${esc(i.muscle||'Eigene Übung')}</span>${i.uni?'<span class="chip">einseitig</span>':''}${best?`<span class="chip hl">Rekord ${fmtSet(best.st)}</span>`:''}</div>
+    <div class="chips" style="margin-top:10px"><span class="chip">${esc(i.muscle||'Eigene Übung')}</span>${i.uni?'<span class="chip">einseitig</span>':''}${best?`<span class="chip hl">Rekord ${fmtSet(best.st)}</span>`:''}${fx('infoChips',id,best)}</div>
     ${i.cues&&i.cues.length?`<div class="sec">Ausführung</div><ol class="cues">${i.cues.map(c=>`<li>${esc(c)}</li>`).join('')}</ol>`:''}
     <a class="btn ghost sm" style="margin-top:12px" href="${ytLink(i.name)}" target="_blank" rel="noopener">▶ Video zur Ausführung</a>
     ${i.cardio?'':`<div class="sec">Notizen</div><textarea data-k="infonote" data-exnote="${esc(id)}" placeholder="Sitz-/Geräteeinstellung, Griff, Tipps …">${esc(S.lib.notes[id]||'')}</textarea>`}
@@ -631,7 +636,7 @@ document.addEventListener('click',async e=>{
       if(r.reps===''){toast(it.uni?'Wiederholungen links eintragen':'Wiederholungen eintragen');get('reps').focus();return}
       if(it.uni&&r.repsR===''){toast('Wiederholungen rechts eintragen');get('repsR').focus();return}
       r.done=true; if(ST().vibrate!==false){try{navigator.vibrate&&navigator.vibrate(15)}catch(err){}} const allDone=it.rows.every(x=>x.done), nxt=D.items[i+1];
-      if(ST().autoTimer!==false) startTimer(it.rest, allDone&&nxt?'als Nächstes: '+nxt.name:it.name);
+      if(ST().autoTimer!==false&&!fx('ssSkip',i)) startTimer(it.rest, allDone&&nxt?'als Nächstes: '+nxt.name:it.name);
     } else r.done=false;
     saveDraft(); render(); break }
   case 'c-done': { const it=D.items[i];
@@ -776,5 +781,6 @@ if('serviceWorker' in navigator && location.protocol!=='file:'){
 }
 render();
 </script>
+<script src="features.js"></script>
 </body>
 </html>
