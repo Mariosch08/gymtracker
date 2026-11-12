@@ -14,7 +14,7 @@ Eine eigenständige Web-App (PWA) zum Tracken des Trainings. Sie wird über GitH
 - **Flexibel:** Übungen tauschen (nur heute oder dauerhaft im Plan), hinzufügen, umsortieren und entfernen. Eigene Übungen lassen sich anlegen.
 - **Einseitige Übungen:** Links und Rechts werden getrennt erfasst.
 - **Notizen:** pro Übung (z. B. Sitzeinstellung) und pro Training.
-- **Ausführung:** Bildanimation (zwei Fotos im Wechsel), 3 Technik-Tipps und ein Link zur YouTube-Suche nach der Übung. Die Bibliothek hat 74 Übungen, 66 davon mit Bildern.
+- **Ausführung:** Bildanimation (zwei Fotos im Wechsel), 3 Technik-Tipps und ein Link zur YouTube-Suche nach der Übung. Die Bibliothek hat 66 Kraftübungen, alle mit Bildern.
 - **Cardio:** 8 Arten mit passenden Feldern (Stairmaster, Laufband, Velo/Ergometer, Crosstrainer, Rudergerät, Laufen draussen, Spazieren, Andere).
 - **Auswertung:** Rekorde (🏆 nach dem Training), Verlaufskurve pro Übung, Körpergewicht (7/30 Tage), Cardio-Minuten pro Woche und ein nach Wochen gruppierter Verlauf.
 - **Plan-Editor:** Tage und Übungen bearbeiten, Sätze, Wdh., Pause und Cardio-Ziel einstellen.
@@ -77,7 +77,7 @@ Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.htm
 - **Datenverlust möglich:** Die Daten liegen nur auf einem Gerät. Wer die Browserdaten löscht oder das Handy wechselt, braucht ein Backup. Auf dem iPhone kann Safari Daten nicht installierter Webseiten nach etwa 7 Tagen ohne Nutzung löschen. Deshalb unbedingt über den Homescreen nutzen.
 - **Timer im Hintergrund:** Ist der Bildschirm gesperrt oder die App im Hintergrund, kommt kein Ton (iOS pausiert JavaScript). «Bildschirm anlassen» hilft als Workaround.
 - **Bilder offline:** Ein Bild ist erst offline verfügbar, wenn es einmal online angesehen wurde.
-- **Bilder ungenau:** Ein paar zeigen eine Variante, z. B. Kurzhantel statt Kabel beim Seitheben. Die Fotos haben einen weissen Hintergrund im dunklen Design. 8 Übungen haben kein Bild.
+- **Bilder ungenau:** Ein paar zeigen eine Variante, z. B. Kurzhantel statt Kabel beim Seitheben. Die Fotos haben einen weissen Hintergrund im dunklen Design. Die Cardio-Arten haben ein Symbol statt eines Bildes.
 - **Wenig Möglichkeiten zum Korrigieren:** Das Datum eines Trainings lässt sich nicht ändern. Ein Import ersetzt alles, statt die Daten zusammenzuführen.
 - **Code:** Alles steht in einer grossen Datei, und es gibt keine automatischen Tests im Repo.
 - **Nicht auf dem Handy getestet:** Bisher nur im Desktop-Chrome getestet, nicht auf einem echten iPhone oder Android-Gerät.
