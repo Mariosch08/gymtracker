@@ -20,6 +20,7 @@ Eine eigenständige Web-App (PWA) zum Tracken des Trainings. Sie wird über GitH
 - **Plan-Editor:** Tage und Übungen bearbeiten, Sätze, Wdh., Pause und Cardio-Ziel einstellen.
 - **Einstellungen:** Gewichtsschritt, Auto-Timer, Auto-Steigerung, Bildschirm anlassen, Ton und Vibration, Standardwerte.
 - **Daten:** Backup als JSON-Datei herunterladen und wieder einlesen, mit Erinnerung nach 14 Tagen. Beim Einlesen lässt sich wählen: zusammenführen (ergänzt Fehlendes) oder ersetzen.
+- **Garmin / Strava:** Jedes Training (im Verlauf und nach dem Abschliessen) lässt sich als .fit-Datei exportieren und in Garmin Connect («Daten importieren») oder bei Strava hochladen. Bei Garmin erscheint es als Krafttraining mit Übungstyp, Sätzen, Wdh. und Gewicht. Die Satz-Zeiten sind geschätzt (gleichmässig über die Trainingsdauer verteilt), weil die App keine Zeit pro Satz speichert.
 - **Korrigieren:** Gespeicherte Trainings lassen sich nachträglich bearbeiten, inklusive Datum und Zeit.
 - **Bedienung wie eine App:** Tab-Leiste unten, die Zurück-Taste bzw. Wischgeste schliesst Fenster und führt zur Startseite, Zahlenfelder werden beim Antippen markiert, und ein Hinweis erklärt die Installation auf dem Homescreen.
 - **Ghost-Modus:** Unter jedem Satz steht der Wert vom letzten Training (👻). Sobald du Wdh. einträgst, zeigt die App, ob du besser, gleich oder schwächer bist, und ein Balken vergleicht das Volumen Satz für Satz.
@@ -43,7 +44,8 @@ Reines HTML, CSS und JavaScript, ohne Framework und ohne Build.
 | `index.html` | Die Grund-App: Training, Verlauf, Fortschritt, Plan, Einstellungen |
 | `features.js` | Zusatzfunktionen: Heatmap, Abzeichen, Jahresrückblick, 1RM, Ghost, Scheiben-Rechner, Sprache, Schnell-Training, Bilder. Wird nach dem Hauptskript geladen und über `window.GTX` eingehängt. Fehlt die Datei, läuft die Grund-App weiter. |
 | `exercises.js` | Übungsbibliothek (`CATALOG`) und Cardio-Arten (`CARDIO`), selbst editierbar |
-| `sw.js` | Service Worker für den Offline-Modus: App-Dateien kommen sofort aus dem Cache `gym-tracker-v5` und werden im Hintergrund erneuert, Bilder liegen im Cache `gym-tracker-img` |
+| `fit.js` | FIT-Export für Garmin/Strava, inklusive Zuordnung der Übungen zu Garmins Übungstypen (`EX`) |
+| `sw.js` | Service Worker für den Offline-Modus: App-Dateien kommen sofort aus dem Cache `gym-tracker-v6` und werden im Hintergrund erneuert, Bilder liegen im Cache `gym-tracker-img` |
 | `manifest.webmanifest`, Icons | Für die Installation auf dem Homescreen |
 | `img/` | Übungsbilder `<id>_0.jpg` und `<id>_1.jpg` aus [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (Public Domain), etwa 2,6 MB |
 
@@ -88,6 +90,7 @@ Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.htm
 | Vanilla JS statt React o. Ä. | Kein Build nötig, Dateien lassen sich direkt bearbeiten. |
 | Bilder im Repo statt echter GIFs oder Videos | Frei lizenziert, funktioniert offline, keine Abhängigkeit von fremden Servern. Für Videos gibt es den YouTube-Link. |
 | Service Worker «Cache zuerst, im Hintergrund aktualisieren» | Die App startet sofort, auch bei schlechtem Empfang im Gym. Nachteil: Ein Update ist erst nach «Aktualisieren» bzw. beim übernächsten Start aktiv. Zuvor galt «Netzwerk zuerst», was bei schwachem Netz den Start verzögerte. |
+| FIT-Datei statt direkter Verbindung | Garmins Schnittstelle gibt es nur für freigegebene Firmen. Strava ginge per API, braucht aber einen kleinen Server für den geheimen OAuth-Schlüssel. Die Datei funktioniert für beide ohne Server, dafür ist das Hochladen ein Handgriff im Browser. |
 | JSON-Export | Backup und ein späterer Umzug, z. B. zu PocketBase, sind damit möglich. |
 
 ## Bekannte Schwächen

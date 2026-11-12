@@ -1,7 +1,7 @@
 // Sofort aus dem Cache starten (auch bei schlechtem Empfang), im Hintergrund aktualisieren.
 // Findet sich eine neue Version, meldet die App «Neue Version verfügbar».
-const CACHE = 'gym-tracker-v5', IMG = 'gym-tracker-img';
-const FILES = ['./', './index.html', './exercises.js', './features.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+const CACHE = 'gym-tracker-v6', IMG = 'gym-tracker-img';
+const FILES = ['./', './index.html', './exercises.js', './features.js', './fit.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== IMG).map(k => caches.delete(k)))).then(() => self.clients.claim()));

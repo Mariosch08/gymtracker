@@ -157,6 +157,7 @@ label.chkrow span{flex:1}
 </div>
 <div id="toast" hidden></div>
 <script src="exercises.js"></script>
+<script src="fit.js"></script>
 <script>
 /* ================= Bibliothek ================= */
 const MUSCLES = CATALOG.map(c=>c[0]);
@@ -167,7 +168,7 @@ CARDIO.forEach(([id,name,icon,fields])=>CARD[id]={id,name,icon,fields,muscle:'Ca
 const isCardio = id => !!CARD[id] || String(id).startsWith('cardio_');
 
 /* ================= State ================= */
-const APP_VERSION='5';
+const APP_VERSION='6';
 /* Zusatzfunktionen aus features.js (Heatmap, Abzeichen, Ghost usw.). Fehlt die Datei, läuft die App ohne sie weiter. */
 const fx=(n,...a)=>window.GTX&&GTX[n]?GTX[n](...a):'';
 const DEF_SETTINGS={step:2.5,defRest:90,defSets:3,defRepMin:8,defRepMax:12,autoTimer:true,autoInc:true,sound:true,vibrate:true,wake:true,notify:false};
@@ -293,7 +294,7 @@ async function finish(){
   const dur=Math.max(1,Math.round((Date.now()-S.draft.startedAt)/60000));
   const doc={date:new Date().toISOString(),dayId:S.draft.dayId,dayName:S.draft.dayName,durationMin:dur,note:S.draft.note||'',entries};
   try{ await write('sessions/'+id,doc) }catch(e){return}
-  S.summary={dayName:doc.dayName,dur,sets:entries.reduce((n,e)=>n+(e.sets?e.sets.length:0),0),
+  S.summary={id,dayName:doc.dayName,dur,sets:entries.reduce((n,e)=>n+(e.sets?e.sets.length:0),0),
     vol:Math.round(entries.reduce((v,e)=>v+(e.sets?e.sets.reduce((a,s)=>a+setVol(s),0):0),0)),
     cardio:entries.filter(e=>e.cardio).reduce((m,e)=>m+(e.cardio.min||0),0),prs,preBadges};
   S.draft=null; saveDraft(); stopTimer(); S.view='summary'; render(); scrollTo(0,0) }
@@ -430,7 +431,8 @@ function vSummary(){ const s=S.summary;
   return `<div class="card" style="text-align:center"><div style="font-size:42px">💪</div><div class="big">${esc(s.dayName)} erledigt</div>
     <div class="row" style="margin:12px 0"><div class="stat"><b>${s.dur}</b><span class="muted">Min.</span></div><div class="stat"><b>${s.sets}</b><span class="muted">Sätze</span></div>${s.cardio?`<div class="stat"><b>${Math.round(s.cardio)}</b><span class="muted">Cardio-Min.</span></div>`:`<div class="stat"><b>${s.vol}</b><span class="muted">kg Volumen</span></div>`}</div>
     ${s.prs.length?`<div style="text-align:left"><div class="muted" style="margin-bottom:4px">Neue Rekorde 🏆</div>${s.prs.map(p=>`<div class="badge pr" style="margin-right:6px">${esc(p.name)}: ${fmtSet(p.st)}</div>`).join('')}</div>`:''}${fx('summary',s)}
-    <button class="btn pri" style="margin-top:16px" data-act="nav" data-v="home">Fertig</button></div>` }
+    <button class="btn ghost" style="margin-top:16px;width:100%" data-act="fit" data-id="${esc(s.id||'')}">⌚ Für Garmin / Strava exportieren</button>
+    <button class="btn pri" style="margin-top:10px" data-act="nav" data-v="home">Fertig</button></div>` }
 
 function entryLine(e){ return e.cardio?`<div class="ex"><span class="muted">${esc((CARD[e.exId]||{}).icon||'❤️')} ${esc(e.name)}:</span> ${fmtCardio(e.cardio,(CARD[e.exId]||{}).fields)}</div>`
   :`<div class="ex"><span class="muted">${esc(e.name)}:</span> ${(e.sets||[]).map(fmtSet).join(' · ')}</div>` }
@@ -441,7 +443,7 @@ function vHistory(){
     h+=`<div class="card hist"><div class="between"><b>${esc(s.dayName||s.dayId)}</b><span class="muted">${fmtD(s.date)}${s.durationMin?' · '+s.durationMin+' Min.':''}</span></div>
     ${(s.entries||[]).map(entryLine).join('')}
     ${s.note?`<div class="notebox">📝 ${esc(s.note)}</div>`:''}
-    <div class="tools"><button class="btn xs ghost" data-act="es-open" data-id="${esc(s.id)}">Bearbeiten</button><button class="btn xs danger" data-act="delsess" data-id="${esc(s.id)}">${S.confirm==='del:'+s.id?'Nochmals tippen':'Löschen'}</button></div></div>` });
+    <div class="tools"><button class="btn xs ghost" data-act="fit" data-id="${esc(s.id)}">⌚ Garmin/Strava</button><button class="btn xs ghost" data-act="es-open" data-id="${esc(s.id)}">Bearbeiten</button><button class="btn xs danger" data-act="delsess" data-id="${esc(s.id)}">${S.confirm==='del:'+s.id?'Nochmals tippen':'Löschen'}</button></div></div>` });
   return h }
 
 function vEditSess(){ const s=S.editSess;
@@ -538,6 +540,7 @@ function vSettings(){ const s=ST(), st=+s.step||2.5;
 
 function vModal(){ const M=S.modal;
   if(M.mode==='info') return vInfo(M.ex);
+  if(M.mode==='fit') return vFitHelp(M);
   if(M.mode.startsWith('x-')) return fx('modal',M);
   const title={'w-swap':'Übung tauschen','w-add':'Übung hinzufügen','w-cardio':'Cardio hinzufügen','pe-swap':'Übung im Plan tauschen','pe-add':'Übung zum Plan hinzufügen','pe-cardio':'Cardio zum Plan hinzufügen'}[M.mode];
   const workout=M.mode.startsWith('w-')&&planDayEx();
@@ -545,6 +548,24 @@ function vModal(){ const M=S.modal;
     ${workout?`<div class="seg"><button class="${M.scope==='today'?'on':''}" data-act="m-scope" data-s="today">Nur heute</button><button class="${M.scope==='plan'?'on':''}" data-act="m-scope" data-s="plan">Auch im Plan</button></div>`:''}
     ${M.only==='cardio'?'':`<input type="text" data-k="mq" data-q="1" value="${esc(M.q)}" placeholder="Suchen …" style="margin-top:10px">`}</div>
     <div class="panel-b" id="pickList">${pickList()}</div></div></div>` }
+function vFitHelp(M){
+  return `<div class="modal" data-act="m-close-bg"><div class="panel"><div class="panel-h"><div class="between"><b>Zu Garmin / Strava</b><button class="btn xs ghost" data-act="m-close">✕</button></div></div>
+    <div class="panel-b" style="padding-top:14px"><div style="margin-bottom:10px">${M.shared?'Datei geteilt':'Datei gespeichert'}: <b style="word-break:break-all">${esc(M.name)}</b></div>
+    <div class="muted" style="margin-bottom:12px">Jetzt die Datei hochladen. Das geht im Browser, nicht in der Garmin- oder Strava-App. Auf dem Handy die Seite öffnen, «Datei auswählen» tippen und die .fit-Datei aus «Downloads» bzw. «Dateien» wählen.</div>
+    <a class="btn pri" style="text-decoration:none;margin-bottom:8px" href="https://connect.garmin.com/modern/import-data" target="_blank" rel="noopener">Garmin Connect: Daten importieren</a>
+    <a class="btn ghost" style="text-decoration:none;width:100%;box-sizing:border-box;margin-bottom:12px" href="https://www.strava.com/upload/select" target="_blank" rel="noopener">Strava: Datei hochladen</a>
+    <div class="muted" style="font-size:13px">Tipp: Ist Garmin mit Strava verbunden, reicht der Upload bei Garmin. Bei Garmin erscheint das Training als Krafttraining mit allen Sätzen, bei Strava als «Krafttraining» mit Dauer.</div>
+    <button class="btn sm ghost" style="margin-top:12px" data-act="fit" data-id="${esc(M.id)}">Datei nochmals speichern</button></div></div></div>` }
+async function exportFit(id){
+  const s=S.sessions.find(x=>x.id===id); if(!s){toast('Training nicht gefunden');return}
+  let bytes; try{ bytes=GymFit.sessionToFit(s) }catch(e){ console.error(e); toast('Export fehlgeschlagen'); return }
+  const name=GymFit.fitFileName(s); let shared=false;
+  try{ const f=new File([bytes],name,{type:'application/vnd.ant.fit'});
+    if(/Android|iPhone|iPad|iPod/.test(navigator.userAgent)&&navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:name}); shared=true } }
+  catch(e){ if(e&&e.name==='AbortError') return }
+  if(!shared){ const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
+    const l=document.createElement('a'); l.href=url; l.download=name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000) }
+  S.modal={mode:'fit',id,name,shared}; render() }
 function pickList(){ const M=S.modal, q=M.q.trim().toLowerCase();
   if(M.only==='cardio') return CARDIO.map(([id,name,icon])=>`<button class="pick" data-act="m-pick" data-id="${id}"><span class="ph">${icon}</span>${esc(name)}</button>`).join('');
   const all=[]; CATALOG.forEach(([m,l])=>l.forEach(([id,name])=>all.push({id,name,muscle:m,img:true}))); (S.lib.custom||[]).forEach(c=>all.push({...c,custom:true}));
@@ -641,6 +662,7 @@ document.addEventListener('click',async e=>{
   case 'note-edit': S.noteEdit=b.dataset.ex; render(); break;
   case 'note-done': S.noteEdit=null; render(); break;
   case 'info': S.modal={mode:'info',ex:b.dataset.ex}; render(); break;
+  case 'fit': await exportFit(b.dataset.id); break;
   case 'finish': b.disabled=true; await finish(); b.disabled=false; break;
   case 'delsess': { const id=b.dataset.id; if(confirmTap('del:'+id)){ try{await S.db.doc('sessions/'+id).delete();toast('Gelöscht')}catch(err){toast('Löschen fehlgeschlagen')} render() } break }
   case 'es-open': { const s=S.sessions.find(x=>x.id===b.dataset.id); if(s){S.editSess=clone(s);S.view='editsess';render();scrollTo(0,0)} break }
