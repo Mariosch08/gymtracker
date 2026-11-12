@@ -13,20 +13,29 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <style>
-:root{--bg:#0f1115;--card:#171a21;--card2:#20242d;--line:#2a2f3a;--txt:#e9ecf1;--mut:#8b93a3;--acc:#4ade80;--acc2:#22c55e;--warn:#fbbf24;--red:#f87171;--blue:#60a5fa}
+:root{--tabh:calc(56px + env(safe-area-inset-bottom));--bg:#0f1115;--card:#171a21;--card2:#20242d;--line:#2a2f3a;--txt:#e9ecf1;--mut:#8b93a3;--acc:#4ade80;--acc2:#22c55e;--warn:#fbbf24;--red:#f87171;--blue:#60a5fa}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-button{font:inherit}
+html{-webkit-text-size-adjust:100%}
+body{overscroll-behavior-y:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body.lock{overflow:hidden}
+input,textarea,.notebox,ol.cues{-webkit-user-select:text;user-select:text}
+button{font:inherit;touch-action:manipulation}
+button,.btn{transition:transform .08s,opacity .08s}
+button:active,.btn:active{transform:scale(.96);opacity:.75}
 a{color:var(--blue)}
-header{position:sticky;top:0;z-index:5;background:rgba(15,17,21,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top)) 12px 0}
+header{position:sticky;top:0;z-index:5;background:rgba(15,17,21,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
 .htop{display:flex;justify-content:space-between;align-items:center;max-width:640px;margin:0 auto}
 h1{font-size:19px;margin:0}
 .gear{background:none;border:0;color:var(--mut);font-size:22px;padding:4px 6px;cursor:pointer}
 .gear.on{color:var(--acc)}
-nav{display:flex;max-width:640px;margin:4px auto 0}
-nav button{flex:1;background:none;border:0;color:var(--mut);padding:8px 0 10px;font-size:14px;border-bottom:2px solid transparent;cursor:pointer}
-nav button.on{color:var(--txt);border-color:var(--acc)}
-main{padding:12px;max-width:640px;margin:0 auto;padding-bottom:150px}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:8;background:rgba(15,17,21,.97);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:0 8px env(safe-area-inset-bottom)}
+nav>div{display:flex;max-width:640px;margin:0 auto}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--mut);padding:8px 0 6px;height:56px;font-size:11px;cursor:pointer}
+nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--acc)}
+body.kb nav{display:none}
+main{padding:12px;max-width:640px;margin:0 auto;padding-bottom:calc(var(--tabh) + 110px)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
 .muted{color:var(--mut);font-size:14px}
 .sec{color:var(--mut);margin:20px 2px 8px;font-weight:700;text-transform:uppercase;font-size:12px;letter-spacing:.06em}
@@ -84,19 +93,23 @@ tr.done input{border-color:#245c38;color:#b7f5cc}
 .pe-grid input{padding:8px 2px;font-size:15px}
 .pe-ex{border-top:1px solid var(--line);padding:12px 0}
 .pe-ex:first-of-type{border-top:0}
-#timer{position:fixed;left:0;right:0;bottom:0;z-index:10;background:#122a1b;border-top:1px solid #245c38;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px}
+#timer{position:fixed;left:0;right:0;bottom:var(--tabh);z-index:10;background:#122a1b;border-top:1px solid #245c38;padding:10px 14px;display:flex;align-items:center;gap:8px}
 #timer[hidden]{display:none}
+body.kb #timer{bottom:0}
 #tTime{font-size:30px;font-weight:750;font-variant-numeric:tabular-nums}
 #tBar{position:absolute;left:0;top:0;height:3px;background:var(--acc)}
 #timer.over{background:#3a2f0b;border-color:#6b5414}
-.savebar{position:fixed;left:0;right:0;bottom:0;z-index:9;background:#1b2333;border-top:1px solid #34405a;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px}
+.savebar{position:fixed;left:0;right:0;bottom:var(--tabh);z-index:9;background:#1b2333;border-top:1px solid #34405a;padding:10px 14px;display:flex;gap:8px}
+body.kb .savebar{bottom:0}
 .savebar .btn{flex:1}
 #toast{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);background:#22332a;color:#dfe;padding:10px 16px;border-radius:10px;z-index:30;font-size:14px;max-width:90%;text-align:center}
 #toast[hidden]{display:none}
 .modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
-.panel{background:var(--bg);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:90vh;display:flex;flex-direction:column}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;animation:up .18s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}button,.btn{transition:none}}
 .panel-h{padding:14px;border-bottom:1px solid var(--line)}
-.panel-b{padding:8px 14px calc(24px + env(safe-area-inset-bottom));overflow-y:auto}
+.panel-b{padding:8px 14px calc(24px + env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .seg{display:flex;background:var(--card2);border-radius:10px;padding:3px;margin-top:10px}
 .seg button{flex:1;border:0;background:none;color:var(--mut);padding:8px;border-radius:8px;cursor:pointer;font-size:14px}
 .seg button.on{background:var(--card);color:var(--txt);font-weight:600}
@@ -125,13 +138,13 @@ label.chkrow span{flex:1}
 <body>
 <header>
   <div class="htop"><h1>Gym Tracker</h1><button class="gear" data-act="nav" data-v="settings" aria-label="Einstellungen">⚙︎</button></div>
-  <nav>
-    <button data-act="nav" data-v="home">Training</button>
-    <button data-act="nav" data-v="history">Verlauf</button>
-    <button data-act="nav" data-v="progress">Fortschritt</button>
-    <button data-act="nav" data-v="plan">Plan</button>
-  </nav>
 </header>
+<nav><div>
+  <button data-act="nav" data-v="home"><svg viewBox="0 0 24 24"><path d="M6 7v10M3 10v4M18 7v10M21 10v4M6 12h12"/></svg>Training</button>
+  <button data-act="nav" data-v="history"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>Verlauf</button>
+  <button data-act="nav" data-v="progress"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 15l4-4 3 3 5-7"/></svg>Fortschritt</button>
+  <button data-act="nav" data-v="plan"><svg viewBox="0 0 24 24"><path d="M9 7h10M9 12h10M9 17h10M5 7h.01M5 12h.01M5 17h.01"/></svg>Plan</button>
+</div></nav>
 <main id="app"><div class="muted">Lädt …</div></main>
 <div id="modal"></div>
 <div id="savebar"></div>
@@ -154,11 +167,12 @@ CARDIO.forEach(([id,name,icon,fields])=>CARD[id]={id,name,icon,fields,muscle:'Ca
 const isCardio = id => !!CARD[id] || String(id).startsWith('cardio_');
 
 /* ================= State ================= */
-const DEF_SETTINGS={step:2.5,defRest:90,defSets:3,defRepMin:8,defRepMax:12,autoTimer:true,autoInc:true,sound:true,vibrate:true,wake:true};
+const APP_VERSION='4';
+const DEF_SETTINGS={step:2.5,defRest:90,defSets:3,defRepMin:8,defRepMax:12,autoTimer:true,autoInc:true,sound:true,vibrate:true,wake:true,notify:false};
 const S = { db:null, plan:null, planLoaded:false, sessions:[], sessLoaded:false,
   lib:{custom:[],notes:{}}, settings:{...DEF_SETTINGS}, body:{entries:[]},
   view:'home', draft:null, timer:null, confirm:null, modal:null, restEdit:null, noteEdit:null,
-  planEdit:null, peDirty:false, editSess:null, summary:null, openProg:{}, exportText:null, importData:null };
+  planEdit:null, peDirty:false, editSess:null, summary:null, openProg:{}, exportText:null, importData:null, updateReady:false };
 const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 S.draft=lsGet('gt_draft2'); S.timer=lsGet('gt_timer');
@@ -181,6 +195,12 @@ const weekStart=(d=new Date())=>{const w=new Date(d);w.setHours(0,0,0,0);w.setDa
 const ytLink=name=>'https://www.youtube.com/results?search_query='+encodeURIComponent(name+' richtige Ausführung');
 function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2600)}
 const ST=()=>S.settings;
+const isStandalone=()=>{ try{ return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches }catch(e){ return false } };
+const localDT=iso=>{ const d=new Date(iso); if(isNaN(d)) return ''; const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+'T'+z(d.getHours())+':'+z(d.getMinutes()) };
+let refocusing=false;
+const SUBVIEWS=['history','editsess','progress','plan','settings'];
+let hDepth=0, hSkip=0;
+try{ history.replaceState({d:0},'') }catch(e){}
 
 function exInfo(id){ return CAT[id] || CARD[id] || (S.lib.custom||[]).find(c=>c.id===id) || {id,name:id,muscle:'',cues:[]} }
 function imgHTML(id,cls){ const i=exInfo(id);
@@ -279,7 +299,12 @@ async function finish(){
 let ac=null;
 function ensureAudio(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
 function beep(){ if(ST().sound!==false){try{if(ac)[0,.25,.5].forEach(t=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.25,ac.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.2);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.2)})}catch(e){}}
-  if(ST().vibrate!==false){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}} }
+  if(ST().vibrate!==false){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+  notifyRest() }
+function notifyRest(){ try{ if(!ST().notify||document.visibilityState==='visible'||!('Notification' in window)||Notification.permission!=='granted'||!navigator.serviceWorker) return;
+  const body=S.timer&&S.timer.label?S.timer.label:'';
+  navigator.serviceWorker.ready.then(r=>r.showNotification('Pause vorbei – nächster Satz',{body,tag:'rest',renotify:true,icon:'icon-192.png',badge:'icon-192.png',vibrate:[200,100,200]})).catch(()=>{}) }catch(e){} }
+function clearNotifs(){ try{ navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.getNotifications&&r.getNotifications({tag:'rest'})).then(l=>(l||[]).forEach(n=>n.close())).catch(()=>{}) }catch(e){} }
 function startTimer(sec,label){ if(!sec) return; S.timer={end:Date.now()+sec*1000,total:sec,label,beeped:false};lsSet('gt_timer',S.timer);tick()}
 function stopTimer(){S.timer=null;lsSet('gt_timer',null);$('timer').hidden=true}
 function tick(){ const t=S.timer,el=$('timer');
@@ -292,7 +317,7 @@ setInterval(tick,250);
 let wl=null;
 async function updateWake(){ const want=ST().wake!==false&&S.view==='workout'&&S.draft&&document.visibilityState==='visible';
   try{ if(want&&!wl&&navigator.wakeLock){ wl=await navigator.wakeLock.request('screen'); wl.addEventListener('release',()=>{wl=null}) } else if(!want&&wl){ const w=wl; wl=null; await w.release() } }catch(e){} }
-document.addEventListener('visibilitychange',()=>{ updateWake(); tick() });
+document.addEventListener('visibilitychange',()=>{ updateWake(); tick(); if(document.visibilityState==='visible') clearNotifs() });
 
 /* ================= Render ================= */
 function spark(vals,color='#4ade80'){ if(vals.length<2) return ''; const w=300,h=46,p=4,mn=Math.min(...vals),mx=Math.max(...vals),rg=mx-mn||1;
@@ -316,13 +341,26 @@ function render(){
   $('app').innerHTML=h;
   $('modal').innerHTML=S.modal?vModal():'';
   $('savebar').innerHTML=(S.view==='plan'&&S.peDirty)?`<div class="savebar"><button class="btn ghost" data-act="pe-reset">Verwerfen</button><button class="btn pri" data-act="pe-save">Plan speichern</button></div>`:'';
-  if(k){const el=document.querySelector(`[data-k="${CSS.escape(k)}"]`); if(el){el.focus({preventScroll:true}); try{if(sel)el.setSelectionRange(sel[0],sel[1])}catch(e){}}}
-  tick(); updateWake();
+  if(k){const el=document.querySelector(`[data-k="${CSS.escape(k)}"]`); if(el){refocusing=true; el.focus({preventScroll:true}); refocusing=false; try{if(sel)el.setSelectionRange(sel[0],sel[1])}catch(e){}}}
+  document.body.classList.toggle('lock',!!S.modal);
+  { const ae=document.activeElement; if(!ae||!ae.matches||!ae.matches('input:not([type=checkbox]):not([type=file]),textarea')) document.body.classList.remove('kb') }
+  syncHistory(); tick(); updateWake();
 }
+
+/* Zurück-Taste (Android) und Wischgeste: schliesst Fenster bzw. geht zur Startseite, statt die App zu verlassen */
+function syncHistory(){ const want=(SUBVIEWS.includes(S.view)?1:0)+(S.modal?1:0);
+  try{ while(hDepth<want){ hDepth++; history.pushState({d:hDepth},'') }
+    if(hDepth>want){ const n=hDepth-want; hDepth=want; hSkip++; history.go(-n) } }catch(e){} }
+window.addEventListener('popstate',e=>{ if(hSkip>0){hSkip--;return}
+  hDepth=(e.state&&e.state.d)||0;
+  if(S.modal) S.modal=null; else if(SUBVIEWS.includes(S.view)){ S.view=S.draft?'workout':'home'; S.editSess=null }
+  render() });
 
 function vHome(){
   if(!S.planLoaded) return '<div class="muted">Lädt …</div>';
   let h='';
+  if(S.updateReady) h+=`<div class="card between"><span>Neue Version verfügbar.</span><button class="btn sm" data-act="reload">Aktualisieren</button></div>`;
+  if(!isStandalone()&&!lsGet('gt_hintOff')) h+=`<div class="card"><b>Als App installieren</b><div class="muted" style="margin:6px 0 10px">${/iPhone|iPad|iPod/.test(navigator.userAgent)?'In Safari unten auf Teilen tippen und «Zum Home-Bildschirm» wählen.':'Im Browser-Menü «App installieren» bzw. «Zum Startbildschirm hinzufügen» wählen.'} Dann startet der Tracker im Vollbild, und deine Daten sind besser vor dem automatischen Löschen geschützt.</div><button class="btn sm ghost" data-act="hint-off">Verstanden</button></div>`;
   if(S.draft) h+=`<div class="card"><div class="muted">Training läuft</div><div class="big">${esc(S.draft.dayName)}</div><button class="btn pri" data-act="resume">Weiter</button></div>`;
   if(!S.plan||!days().length) h+=`<div class="card">Noch kein Trainingsplan. Leg im Tab <b>Plan</b> Trainingstage an.</div>`;
   else if(!S.draft){ const nid=nextDayId(), nd=S.plan.days[nid];
@@ -404,7 +442,8 @@ function vHistory(){
   return h }
 
 function vEditSess(){ const s=S.editSess;
-  let h=`<div class="card"><div class="muted">Training bearbeiten</div><div class="big" style="margin:0">${esc(s.dayName||s.dayId)} · ${fmtD(s.date)}</div></div>`;
+  let h=`<div class="card"><div class="muted">Training bearbeiten</div><div class="big" style="margin:0 0 10px">${esc(s.dayName||s.dayId)}</div>
+    <div class="setrow" style="border:0;padding:0"><span class="muted">Datum und Zeit</span><input type="datetime-local" data-k="esdate" data-esdate="1" value="${esc(localDT(s.date))}" style="width:auto;flex:none;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:8px;font-size:16px;color-scheme:dark"></div></div>`;
   (s.entries||[]).forEach((e,i)=>{ h+=`<div class="card"><div class="between"><div class="exname">${esc(e.name)}</div><button class="btn xs danger" data-act="es-delex" data-i="${i}">Entfernen</button></div>`;
     if(e.cardio){ const fl=(CARD[e.exId]||{}).fields||Object.keys(e.cardio);
       h+=`<div class="cgrid">${fl.map(f=>`<div><label>${esc((CARDIO_FIELDS[f]||[f])[0])}</label><input type="number" inputmode="decimal" data-k="esc${i}_${f}" data-esc="${f}" data-i="${i}" value="${esc(e.cardio[f]??'')}"></div>`).join('')}</div></div>`; return }
@@ -478,7 +517,8 @@ function vSettings(){ const s=ST(), st=+s.step||2.5;
     ${chk('autoTimer','Pausen-Timer nach jedem Satz starten')}
     ${chk('wake','Bildschirm während Training anlassen')}
     ${chk('sound','Ton am Ende der Pause')}
-    ${chk('vibrate','Vibration (nur Android)')}</div>
+    ${chk('vibrate','Vibration (nur Android)')}
+    ${chk('notify','Benachrichtigung am Pausenende, wenn die App im Hintergrund ist (v. a. Android)')}</div>
     <div class="sec">Standard für neue Übungen</div><div class="card">
     ${numRow('defSets','Sätze')}${numRow('defRepMin','Wdh. min')}${numRow('defRepMax','Wdh. max')}${numRow('defRest','Pause (Sekunden)',15)}</div>`;
   const cust=S.lib.custom||[];
@@ -487,9 +527,9 @@ function vSettings(){ const s=ST(), st=+s.step||2.5;
   h+=`<div class="sec">Daten & Backup</div><div class="card"><div class="muted" style="margin-bottom:10px">Deine Daten sind nur auf diesem Gerät gespeichert. Mach regelmässig ein Backup, z. B. in iCloud oder Google Drive. ${lb?'Letztes Backup: '+fmtD(lb)+'.':'Noch kein Backup gemacht.'}</div>
     <div class="row"><button class="btn sm" data-act="backup">Backup herunterladen</button><button class="btn sm ghost" data-act="exp">Als Text</button></div>
     ${S.exportText?`<textarea readonly style="min-height:140px;font-size:12px;margin-top:8px" id="expTxt">${esc(S.exportText)}</textarea><div class="row" style="margin-top:8px"><button class="btn sm" data-act="exp-copy">Kopieren</button><button class="btn sm ghost" data-act="exp-close">Schliessen</button></div>`:''}
-    <div class="muted" style="margin:14px 0 6px">Backup wiederherstellen (ersetzt alle aktuellen Daten):</div>
-    ${S.importData?`<div class="card" style="background:var(--card2)">Backup mit <b>${S.importData.sessions.length}</b> Trainings gefunden.<div class="row" style="margin-top:8px"><button class="btn sm danger" data-act="imp-ok">Jetzt ersetzen</button><button class="btn sm ghost" data-act="imp-cancel">Abbrechen</button></div></div>`:`<input type="file" accept=".json,application/json" data-imp="1">`}</div>
-    <div class="muted" style="text-align:center;margin-top:12px">Übungsbilder: free-exercise-db (Public Domain)</div>`;
+    <div class="muted" style="margin:14px 0 6px">Backup einlesen:</div>
+    ${S.importData?`<div class="card" style="background:var(--card2)">Backup mit <b>${S.importData.sessions.length}</b> Trainings gefunden.<div class="muted" style="margin-top:6px"><b>Zusammenführen</b> ergänzt fehlende Trainings, Körpergewichte, eigene Übungen und Notizen. <b>Ersetzen</b> überschreibt alles auf diesem Gerät.</div><div class="row" style="margin-top:8px"><button class="btn sm" data-act="imp-merge">Zusammenführen</button><button class="btn sm danger" data-act="imp-ok">${S.confirm==='impok'?'Wirklich alles ersetzen?':'Ersetzen'}</button><button class="btn sm ghost" data-act="imp-cancel">Abbrechen</button></div></div>`:`<input type="file" accept=".json,application/json" data-imp="1">`}</div>
+    <div class="muted" style="text-align:center;margin-top:12px">Version ${APP_VERSION} · Übungsbilder: free-exercise-db (Public Domain)</div>`;
   return h }
 
 function vModal(){ const M=S.modal;
@@ -569,7 +609,7 @@ document.addEventListener('click',async e=>{
       fill('kg'); fill('reps'); if(it.uni) fill('repsR');
       if(r.reps===''){toast(it.uni?'Wiederholungen links eintragen':'Wiederholungen eintragen');get('reps').focus();return}
       if(it.uni&&r.repsR===''){toast('Wiederholungen rechts eintragen');get('repsR').focus();return}
-      r.done=true; const allDone=it.rows.every(x=>x.done), nxt=D.items[i+1];
+      r.done=true; if(ST().vibrate!==false){try{navigator.vibrate&&navigator.vibrate(15)}catch(err){}} const allDone=it.rows.every(x=>x.done), nxt=D.items[i+1];
       if(ST().autoTimer!==false) startTimer(it.rest, allDone&&nxt?'als Nächstes: '+nxt.name:it.name);
     } else r.done=false;
     saveDraft(); render(); break }
@@ -637,7 +677,19 @@ document.addEventListener('click',async e=>{
     const l=document.createElement('a'); l.href=url; l.download='gym-tracker-backup-'+today()+'.json'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000);
     lsSet('gt_lastBackup',new Date().toISOString()); toast('Backup erstellt'); render(); break }
   case 'imp-cancel': S.importData=null; render(); break;
-  case 'imp-ok': { const d=S.importData, o={};
+  case 'reload': location.reload(); break;
+  case 'hint-off': lsSet('gt_hintOff',1); render(); break;
+  case 'imp-merge': { const d=S.importData, o=LocalDB.all(); let n=0;
+    d.sessions.forEach(s=>{ if(!s||!s.date) return; const x={...s}, id=x.id||new Date(x.date).toISOString().replace(/[^0-9]/g,'').slice(0,14); delete x.id; if(!('sessions/'+id in o)){ o['sessions/'+id]=x; n++ } });
+    const body=o['body/main']||{entries:[]}, have=new Set((body.entries||[]).map(x=>x.d));
+    ((d.body&&d.body.entries)||[]).forEach(x=>{ if(x&&x.d&&!have.has(x.d)) body.entries.push(x) }); body.entries.sort((x,y)=>x.d<y.d?-1:1); o['body/main']=body;
+    const lib=o['library/main']||{custom:[],notes:{}}; lib.custom=lib.custom||[]; lib.notes=lib.notes||{};
+    ((d.library&&d.library.custom)||[]).forEach(c=>{ if(c&&c.id&&!lib.custom.some(y=>y.id===c.id)) lib.custom.push(c) });
+    Object.entries((d.library&&d.library.notes)||{}).forEach(([k,v])=>{ if(!lib.notes[k]) lib.notes[k]=v }); o['library/main']=lib;
+    if(!o['plan/main']&&d.plan) o['plan/main']=d.plan;
+    try{ LocalDB.replace(o); S.importData=null; toast(n+' Training'+(n===1?'':'s')+' ergänzt') }catch(err){ toast('Import fehlgeschlagen – zu wenig Speicher') }
+    render(); break }
+  case 'imp-ok': { if(!confirmTap('impok')) break; const d=S.importData, o={};
     if(d.plan) o['plan/main']=d.plan; o['library/main']=d.library||{custom:[],notes:{}}; if(d.settings) o['settings/main']=d.settings; o['body/main']=d.body||{entries:[]};
     d.sessions.forEach(s=>{ const x={...s}, id=x.id||new Date(x.date).toISOString().replace(/[^0-9]/g,'').slice(0,14); delete x.id; o['sessions/'+id]=x });
     try{ LocalDB.replace(o); S.importData=null; S.planEdit=null; S.peDirty=false; toast('Backup wiederhergestellt') }catch(err){ toast('Import fehlgeschlagen – zu wenig Speicher') }
@@ -667,9 +719,20 @@ document.addEventListener('input',e=>{ const t=e.target, ds=t.dataset;
   else if(ds.es&&S.editSess){ S.editSess.entries[+ds.i].sets[+ds.j][ds.es]=t.value }
   else if(ds.esc&&S.editSess){ S.editSess.entries[+ds.i].cardio[ds.esc]=t.value }
   else if(ds.esnote&&S.editSess){ S.editSess.note=t.value }
+  else if(ds.esdate&&S.editSess){ const d=new Date(t.value); if(!isNaN(d)) S.editSess.date=d.toISOString() }
 });
+/* Zahlenfeld antippen markiert den Inhalt, damit man direkt überschreiben kann. Tab-Leiste weicht der Tastatur. */
+let kbT=null, selPending=null;
+document.addEventListener('focusin',e=>{ const t=e.target; if(!t.matches||!t.matches('input:not([type=checkbox]):not([type=file]),textarea,select')) return;
+  clearTimeout(kbT); if(!t.matches('select')) document.body.classList.add('kb');
+  if(!refocusing&&t.matches('input[type=number]')){ selPending=t; setTimeout(()=>{ try{ if(document.activeElement===t) t.select() }catch(err){} },0) } });
+document.addEventListener('click',e=>{ const t=selPending; selPending=null; if(t&&e.target===t){ try{ t.select() }catch(err){} } },true);
+document.addEventListener('focusout',()=>{ clearTimeout(kbT); kbT=setTimeout(()=>{ const a=document.activeElement; if(!a||!a.matches||!a.matches('input:not([type=checkbox]):not([type=file]),textarea')) document.body.classList.remove('kb') },150) });
 document.addEventListener('change',e=>{ const t=e.target, ds=t.dataset;
   if(ds.exnote){ const v=t.value.trim(), id=ds.exnote; if((S.lib.notes[id]||'')===v) return; S.lib.notes={...S.lib.notes}; if(v) S.lib.notes[id]=v; else delete S.lib.notes[id]; saveLib().then(()=>toast('Notiz gespeichert')).catch(()=>{}) }
+  else if(ds.set==='notify'&&t.checked){
+    if(!('Notification' in window)||!navigator.serviceWorker){ t.checked=false; toast(isStandalone()?'Benachrichtigungen werden hier nicht unterstützt':'Erst als App installieren, dann einschalten'); return }
+    Notification.requestPermission().then(p=>{ if(p==='granted'){ S.settings={...S.settings,notify:true}; saveSettings().catch(()=>{}) } else { toast('Benachrichtigungen sind blockiert'); render() } }).catch(()=>render()) }
   else if(ds.set){ S.settings={...S.settings,[ds.set]:t.checked}; saveSettings().catch(()=>{}) }
   else if(ds.setsel){ S.settings={...S.settings,[ds.setsel]:num(t.value)}; saveSettings().catch(()=>{}) }
   else if(ds.setnum){ const v=num(t.value); if(v==null||v<0){render();return} S.settings={...S.settings,[ds.setnum]:Math.round(v)}; saveSettings().catch(()=>{}) }
@@ -678,7 +741,17 @@ document.addEventListener('change',e=>{ const t=e.target, ds=t.dataset;
   else if(ds.imp&&t.files&&t.files[0]){ const fr=new FileReader(); fr.onload=()=>{ try{ const d=JSON.parse(fr.result);
       if(!d||(!d.plan&&!Array.isArray(d.sessions))) throw 0; d.sessions=Array.isArray(d.sessions)?d.sessions:[]; S.importData=d; render() }catch(err){ toast('Keine gültige Backup-Datei') } }; fr.readAsText(t.files[0]) }
 });
-if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.type==='update'&&!S.updateReady){ S.updateReady=true; if(S.view==='home') render() } });
+  /* Alle Übungsbilder einmal im Hintergrund für den Offline-Modus speichern */
+  window.addEventListener('load',()=>setTimeout(async()=>{ try{
+    if(!window.caches||!navigator.onLine||(navigator.connection&&navigator.connection.saveData)) return;
+    const ids=Object.keys(CAT), key=ids.length+':'+ids.join(',').length; if(lsGet('gt_imgCache')===key) return;
+    await navigator.serviceWorker.ready; const c=await caches.open('gym-tracker-img'); let ok=true;
+    for(const id of ids) for(const n of [0,1]){ const u='img/'+id+'_'+n+'.jpg'; try{ if(!(await c.match(u))){ const r=await fetch(u); if(r.ok) await c.put(u,r); else ok=false } }catch(err){ ok=false } }
+    if(ok) lsSet('gt_imgCache',key) }catch(err){} },4000));
+}
 render();
 </script>
 </body>

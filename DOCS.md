@@ -19,7 +19,10 @@ Eine eigenständige Web-App (PWA) zum Tracken des Trainings. Sie wird über GitH
 - **Auswertung:** Rekorde (🏆 nach dem Training), Verlaufskurve pro Übung, Körpergewicht (7/30 Tage), Cardio-Minuten pro Woche und ein nach Wochen gruppierter Verlauf.
 - **Plan-Editor:** Tage und Übungen bearbeiten, Sätze, Wdh., Pause und Cardio-Ziel einstellen.
 - **Einstellungen:** Gewichtsschritt, Auto-Timer, Auto-Steigerung, Bildschirm anlassen, Ton und Vibration, Standardwerte.
-- **Daten:** Backup als JSON-Datei herunterladen und wiederherstellen, mit Erinnerung nach 14 Tagen.
+- **Daten:** Backup als JSON-Datei herunterladen und wieder einlesen, mit Erinnerung nach 14 Tagen. Beim Einlesen lässt sich wählen: zusammenführen (ergänzt Fehlendes) oder ersetzen.
+- **Korrigieren:** Gespeicherte Trainings lassen sich nachträglich bearbeiten, inklusive Datum und Zeit.
+- **Bedienung wie eine App:** Tab-Leiste unten, die Zurück-Taste bzw. Wischgeste schliesst Fenster und führt zur Startseite, Zahlenfelder werden beim Antippen markiert, und ein Hinweis erklärt die Installation auf dem Homescreen.
+- **Offline:** Die App startet sofort aus dem Speicher, auch bei schlechtem Empfang. Alle Übungsbilder werden beim ersten Start im Hintergrund gespeichert. Gibt es eine neue Version, erscheint auf der Startseite «Neue Version verfügbar».
 
 ## Technik
 
@@ -29,7 +32,7 @@ Reines HTML, CSS und JavaScript, ohne Framework und ohne Build.
 |---|---|
 | `index.html` | Die ganze App (etwa 690 Zeilen) |
 | `exercises.js` | Übungsbibliothek (`CATALOG`) und Cardio-Arten (`CARDIO`), selbst editierbar |
-| `sw.js` | Service Worker für den Offline-Modus («Netzwerk zuerst», Cache `gym-tracker-v3`) |
+| `sw.js` | Service Worker für den Offline-Modus: App-Dateien kommen sofort aus dem Cache `gym-tracker-v4` und werden im Hintergrund erneuert, Bilder liegen im Cache `gym-tracker-img` |
 | `manifest.webmanifest`, Icons | Für die Installation auf dem Homescreen |
 | `img/` | Übungsbilder `<id>_0.jpg` und `<id>_1.jpg` aus [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (Public Domain), etwa 2,6 MB |
 
@@ -43,6 +46,8 @@ Die Daten liegen im localStorage des Browsers:
 | `gt_draft2` | Das laufende, noch nicht abgeschlossene Training |
 | `gt_timer` | Zustand des Pausen-Timers |
 | `gt_lastBackup` | Zeitpunkt des letzten Backups |
+| `gt_hintOff` | Installationshinweis wurde weggetippt |
+| `gt_imgCache` | Merker, dass alle Bilder offline gespeichert sind |
 
 Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.html`). Das erleichtert einen späteren Wechsel auf IndexedDB.
 
@@ -69,18 +74,16 @@ Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.htm
 | Homelab-Hosting verschoben | Mehr Aufwand (Tailscale, LXC). Sinnvoll erst mit Synchronisierung. |
 | Vanilla JS statt React o. Ä. | Kein Build nötig, Dateien lassen sich direkt bearbeiten. |
 | Bilder im Repo statt echter GIFs oder Videos | Frei lizenziert, funktioniert offline, keine Abhängigkeit von fremden Servern. Für Videos gibt es den YouTube-Link. |
-| Service Worker «Netzwerk zuerst» | Updates kommen sofort an, und offline greift der Cache. |
+| Service Worker «Cache zuerst, im Hintergrund aktualisieren» | Die App startet sofort, auch bei schlechtem Empfang im Gym. Nachteil: Ein Update ist erst nach «Aktualisieren» bzw. beim übernächsten Start aktiv. Zuvor galt «Netzwerk zuerst», was bei schwachem Netz den Start verzögerte. |
 | JSON-Export | Backup und ein späterer Umzug, z. B. zu PocketBase, sind damit möglich. |
 
 ## Bekannte Schwächen
 
 - **Datenverlust möglich:** Die Daten liegen nur auf einem Gerät. Wer die Browserdaten löscht oder das Handy wechselt, braucht ein Backup. Auf dem iPhone kann Safari Daten nicht installierter Webseiten nach etwa 7 Tagen ohne Nutzung löschen. Deshalb unbedingt über den Homescreen nutzen.
-- **Timer im Hintergrund:** Ist der Bildschirm gesperrt oder die App im Hintergrund, kommt kein Ton (iOS pausiert JavaScript). «Bildschirm anlassen» hilft als Workaround.
-- **Bilder offline:** Ein Bild ist erst offline verfügbar, wenn es einmal online angesehen wurde.
+- **Timer im Hintergrund:** Ist der Bildschirm gesperrt oder die App im Hintergrund, kommt kein Ton (iOS pausiert JavaScript). «Bildschirm anlassen» hilft als Workaround. Auf Android lässt sich in den Einstellungen eine Benachrichtigung am Pausenende einschalten; sie kann im Hintergrund verzögert kommen.
 - **Bilder ungenau:** Ein paar zeigen eine Variante, z. B. Kurzhantel statt Kabel beim Seitheben. Die Fotos haben einen weissen Hintergrund im dunklen Design. Die Cardio-Arten haben ein Symbol statt eines Bildes.
-- **Wenig Möglichkeiten zum Korrigieren:** Das Datum eines Trainings lässt sich nicht ändern. Ein Import ersetzt alles, statt die Daten zusammenzuführen.
 - **Code:** Alles steht in einer grossen Datei, und es gibt keine automatischen Tests im Repo.
-- **Nicht auf dem Handy getestet:** Bisher nur im Desktop-Chrome getestet, nicht auf einem echten iPhone oder Android-Gerät.
+- **Nicht auf einem echten Handy getestet:** Getestet in Chrome mit simulierten Handys (iPhone 14, Pixel 7), nicht in Safari und nicht auf einem echten Gerät.
 - **Aufräumen:** Das alte Repo `gym-tracker` und das Claude-Artefakt können gelöscht werden, falls sie noch existieren.
 
 ## Verbesserungsideen (nach Priorität)
@@ -101,9 +104,7 @@ Der Zugriff auf `gt_db` läuft an einer Stelle zusammen (`LocalDB` in `index.htm
 
 ### 3. Bedienung
 
-- Benachrichtigung am Ende der Pause, auch im Hintergrund. Auf Android geht das gut, auf iOS nur eingeschränkt.
-- Alle Bilder beim ersten Laden für den Offline-Modus speichern.
-- Datum eines Trainings bearbeiten. Import mit Zusammenführen statt Ersetzen.
+- Zuverlässige Benachrichtigung am Ende der Pause auf iOS (braucht einen Server für Push-Nachrichten).
 - Körpermasse (Bauchumfang) und Fortschrittsfotos, die lokal bleiben. Beim Fettabbau sind sie aussagekräftiger als die Waage.
 
 ### 4. Technik
